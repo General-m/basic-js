@@ -1,22 +1,32 @@
 const CustomError = require("../extensions/custom-error");
 
 module.exports = function transform(arr) {
-  if (!Array.isArray(arr)) throw new SyntaxError()
-  else {
-    let arrNew = arr.slice();
-    for (i = 0; i < arrNew.length; i++) {
-      if (arrNew[i] === "--discard-next" && typeof (arrNew[i + 1]) == 'number') arrNew.splice(i + 1, 1)
-      else if (arrNew[i] === "--discard-prev" && typeof (arrNew[i - 1]) == 'number') arrNew.splice(i - 1, 1)
-      else if (arrNew[i] === '--double-next' && typeof (arrNew[i + 1]) == 'number') {
-        arr.splice(i + 1, 0, arrNew[i + 1])
-      }
-      else if (arrNew[i] === '--double-prev' && typeof (arrNew[i - 1]) == 'number') {
-        arrNew.splice(i - 1, 0, arrNew[i - 1])
-      }
-
+  if (!Array.isArray(arr)) throw new SyntaxError();
+  let res = [];
+  for (let i = 0; i < arr.length; ++i) {
+    switch (arr[i]) {
+      case "--discard-next":
+        i++;
+        break;
+      case "--discard-prev":
+        if (i > 0 && arr[i - 2] !== '--discard-next') {
+          res.pop();
+        }
+        break;
+      case "--double-next":
+        if (i < arr.length - 1) {
+          res.push(arr[i + 1]);
+        }
+        break;
+      case "--double-prev":
+        if (i > 0 && arr[i - 2] !== '--discard-next') {
+          res.push(arr[i - 1]);
+        }
+        break;
+      default:
+        res.push(arr[i]);
     }
-    let arrRes = arrNew.filter(elem => typeof (elem) == 'number');
-    return arrRes;
   }
+  return res;
 };
 
